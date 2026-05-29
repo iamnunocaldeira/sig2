@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz — Sistemas de Informação Geográfica 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f6f8;--surface:#ffffff;--surface2:#f0f2f5;--surface3:#e5e8ee;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --text:#18191c;--text2:#4b4d5c;--text3:#9a9baa;
+  --accent:#1a56db;--accent-dim:rgba(26,86,219,0.09);--accent-dim2:rgba(26,86,219,0.17);
+  --green:#166534;--green-dim:rgba(22,101,52,0.09);--green-dim2:rgba(22,101,52,0.17);
+  --red:#991b1b;--red-dim:rgba(153,27,27,0.09);--red-dim2:rgba(153,27,27,0.17);
+  --r:10px;--r2:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#1e3a8a 0%,#1a56db 100%);padding:2.5rem 2rem 2rem;position:relative;overflow:hidden;}
+.hero::after{content:'SIG';font-family:'Syne',sans-serif;font-size:180px;font-weight:800;color:rgba(255,255,255,0.05);position:absolute;right:-20px;bottom:-40px;line-height:1;pointer-events:none;}
+.hero-inner{max-width:900px;margin:0 auto;position:relative;}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(22px,5vw,38px);font-weight:800;color:#fff;line-height:1.15;letter-spacing:-1px;margin-bottom:.5rem;}
+.hero p{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.65;max-width:480px;}
+.hero-stats{display:flex;gap:2rem;margin-top:1.75rem;flex-wrap:wrap;}
+.h-stat-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:#fff;}
+.h-stat-lbl{font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px;}
+
+/* TABS */
+.tabs{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;position:sticky;top:0;z-index:100;}
+.tabs-inner{max-width:900px;margin:0 auto;display:flex;overflow-x:auto;scrollbar-width:none;}
+.tabs-inner::-webkit-scrollbar{display:none}
+.tab{font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--text3);background:none;border:none;border-bottom:2px solid transparent;padding:13px 15px;cursor:pointer;white-space:nowrap;transition:color .18s,border-color .18s;flex-shrink:0;}
+.tab:hover:not(.on){color:var(--text2);}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* SCOREBOARD */
+.sb{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 2rem;}
+.sb-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+.sb-chip{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);}
+.sb-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sb-dot.g{background:#16a34a;}.sb-dot.r{background:#dc2626;}.sb-dot.w{background:#9ca3af;}
+.sb-chip strong{color:var(--text);}
+.sb-prog{flex:1;min-width:120px;}
+.sb-lbl{font-size:11px;color:var(--text3);margin-bottom:3px;font-family:'JetBrains Mono',monospace;}
+.sb-track{height:4px;background:var(--surface3);border-radius:999px;overflow:hidden;}
+.sb-fill{height:100%;border-radius:999px;background:var(--accent);transition:width .45s ease;}
+.sb-reset{font-family:'Inter',sans-serif;font-size:11px;font-weight:500;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:6px;padding:5px 12px;cursor:pointer;transition:color .18s,border-color .18s;margin-left:auto;}
+.sb-reset:hover{color:var(--red);border-color:var(--red);}
+
+/* MAIN */
+.main{max-width:900px;margin:0 auto;padding:1.75rem 2rem;}
+
+/* RESULT */
+.result{display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:2.25rem;margin-bottom:1.75rem;text-align:center;}
+.result.on{display:block;animation:up .35s ease;}
+.res-num{font-family:'Syne',sans-serif;font-size:68px;font-weight:800;line-height:1;color:var(--accent);}
+.res-num sub{font-size:30px;color:var(--text3);}
+.res-sub{font-size:12px;color:var(--text2);margin-top:4px;margin-bottom:1.25rem;}
+.res-track{background:var(--surface3);border-radius:999px;height:8px;max-width:300px;margin:0 auto 1.25rem;overflow:hidden;}
+.res-bar{height:100%;border-radius:999px;background:var(--accent);transition:width 1s ease;}
+.res-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:1.25rem;}
+.pill{font-size:12px;font-weight:500;padding:5px 14px;border-radius:999px;}
+.pill.g{background:var(--green-dim);color:var(--green);}
+.pill.r{background:var(--red-dim);color:var(--red);}
+.res-msg{font-size:14px;color:var(--text2);line-height:1.6;max-width:420px;margin:0 auto 1.5rem;}
+.retry{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 26px;cursor:pointer;letter-spacing:.02em;transition:opacity .18s;}
+.retry:hover{opacity:.85;}
+
+/* QUESTION CARD */
+.qc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);margin-bottom:1.1rem;overflow:hidden;animation:up .28s ease both;}
+.qc:nth-child(2){animation-delay:.03s}.qc:nth-child(3){animation-delay:.06s}.qc:nth-child(4){animation-delay:.09s}
+.qc:nth-child(5){animation-delay:.12s}.qc:nth-child(6){animation-delay:.15s}.qc:nth-child(7){animation-delay:.18s}
+.qc:nth-child(8){animation-delay:.21s}.qc:nth-child(9){animation-delay:.24s}.qc:nth-child(10){animation-delay:.27s}
+.qc.ok{border-color:rgba(22,163,74,0.35);}
+.qc.err{border-color:rgba(220,38,38,0.35);}
+
+.qtop{padding:1.1rem 1.4rem .9rem;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;}
+.qnum{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;color:var(--accent);background:var(--accent-dim);border:1px solid rgba(26,86,219,0.18);padding:3px 9px;border-radius:999px;white-space:nowrap;flex-shrink:0;margin-top:1px;}
+.qtext{font-size:14px;line-height:1.65;color:var(--text);}
+
+.qopts{padding:.85rem 1.4rem;display:flex;flex-direction:column;gap:7px;}
+.opt{display:flex;align-items:flex-start;gap:10px;background:none;border:1px solid var(--border);border-radius:var(--r);padding:10px 13px;cursor:pointer;text-align:left;width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text2);line-height:1.5;transition:background .15s,border-color .15s,color .15s;}
+.opt:hover:not(:disabled){background:var(--surface2);border-color:var(--border2);color:var(--text);}
+.opt:disabled{cursor:default;}
+.ol{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:var(--text3);min-width:17px;flex-shrink:0;padding-top:1px;}
+.oi{margin-left:auto;font-size:13px;flex-shrink:0;padding-top:1px;}
+.opt.s-ok{background:var(--green-dim2);border-color:rgba(22,163,74,.4);color:var(--green);}
+.opt.s-ok .ol{color:var(--green);}
+.opt.s-err{background:var(--red-dim2);border-color:rgba(220,38,38,.4);color:var(--red);}
+.opt.s-err .ol{color:var(--red);}
+.opt.s-dim{opacity:.32;}
+
+.qfb{display:none;padding:9px 1.4rem 13px;border-top:1px solid var(--border);font-size:12.5px;line-height:1.55;}
+.qfb.on{display:block;animation:fi .22s ease;}
+.qfb.ok{color:var(--green);}.qfb.err{color:var(--red);}
+.qfb strong{font-weight:600;}
+
+/* fonte do slide */
+.slide-ref{font-family:'JetBrains Mono',monospace;font-size:10px;opacity:.55;display:block;margin-top:4px;}
+
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+
+.footer{text-align:center;padding:2.5rem 2rem;font-size:12px;color:var(--text3);}
+@media(max-width:580px){.main{padding:1.1rem 1rem;}.qtop,.qopts,.qfb{padding-left:1rem;padding-right:1rem;}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <h1>Quiz — Sistemas de Informação Geográfica 2</h1>
+    <p id="hero-theme">Introdução ao SIG</p>
+    <div class="hero-stats">
+      <div><div class="h-stat-val">10</div><div class="h-stat-lbl">versões</div></div>
+      <div><div class="h-stat-val">100</div><div class="h-stat-lbl">perguntas</div></div>
+      <div><div class="h-stat-val">8</div><div class="h-stat-lbl">temas</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="tabs"><div class="tabs-inner" id="tabs"></div></div>
+
+<div class="sb">
+  <div class="sb-inner">
+    <div class="sb-chip"><div class="sb-dot g"></div><span>Certas: <strong id="c-ok">0</strong></span></div>
+    <div class="sb-chip"><div class="sb-dot r"></div><span>Erradas: <strong id="c-err">0</strong></span></div>
+    <div class="sb-chip"><div class="sb-dot w"></div><span>Por responder: <strong id="c-pend">10</strong></span></div>
+    <div class="sb-prog">
+      <div class="sb-lbl" id="sb-lbl">0 / 10</div>
+      <div class="sb-track"><div class="sb-fill" id="sb-fill" style="width:0%"></div></div>
+    </div>
+    <button class="sb-reset" onclick="doReset()">↺ Reiniciar</button>
+  </div>
+</div>
+
+<div class="main" id="main"></div>
+<div class="footer">Quiz — Sistemas de Informação Geográfica 2</div>
+
+<script>
+// Fonte: slide indicado entre parêntesis em cada questão
+const EXAMS = [
+
+// ══════════════════════════════════════════════
+// V1 — Introdução ao SIG (SIG_01 e SIG_02)
+// ══════════════════════════════════════════════
+{label:'V1 · Intro SIG', tema:'Introdução ao SIG', qs:[
+{q:"Segundo Burrough (1986), um SIG é:",
+ o:["Uma tecnologia que armazena, analisa e exibe dados espaciais e não espaciais",
+    "Um poderoso conjunto de ferramentas para recolher, armazenar, recuperar, transformar e visualizar dados sobre o mundo real",
+    "Um sistema que regista ocorrências de entidades materializáveis por pontos, linhas ou áreas",
+    "Um conjunto de ferramentas que permite georreferenciar e extrair dados espaciais"],
+ c:1, s:"SIG_01",
+ e:"Burrough (1986): «Um poderoso conjunto de ferramentas para recolher, armazenar, recuperar, transformar e visualizar dados sobre o mundo real.»"},
+
+{q:"Segundo Parker (1988), um SIG é:",
+ o:["Um poderoso conjunto de ferramentas para recuperar e transformar dados do mundo real",
+    "Um sistema que regista ocorrências de entidades materializáveis por pontos, linhas ou áreas",
+    "Uma tecnologia de informação que armazena, analisa e exibe tanto dados espaciais como não espaciais",
+    "Um conjunto de ferramentas para georreferenciar e visualizar dados espaciais"],
+ c:2, s:"SIG_01",
+ e:"Parker (1988): «Uma tecnologia de informação que armazena, analisa e exibe tanto dados espaciais como não espaciais.»"},
+
+{q:"Segundo Dueker (1979), um SIG é um sistema cuja base de dados regista ocorrências de entidades materializáveis por:",
+ o:["Pixéis, células e grelhas",
+    "Pontos, linhas ou áreas",
+    "Nós, arcos e polígonos topológicos",
+    "Vetores, rasters e tabelas"],
+ c:1, s:"SIG_01",
+ e:"Dueker (1979): «Sistema cuja base de dados regista ocorrências de entidades, atividades ou eventos espacialmente distribuídos, materializáveis por pontos, linhas ou áreas.»"},
+
+{q:"A Ciência da Informação Geográfica é definida na disciplina como:",
+ o:["O conjunto de ferramentas que permite recolher, armazenar e visualizar dados espaciais",
+    "A disciplina que toma o espaço geográfico por objeto de estudo",
+    "O software utilizado para análise e produção de mapas",
+    "O sistema de referência espacial utilizado no posicionamento de pontos"],
+ c:1, s:"SIG_02",
+ e:"«Ciência da Informação Geográfica — Disciplina que toma o espaço geográfico por objeto de estudo.»"},
+
+{q:"Os Sistemas de Informação Geográfica são definidos como:",
+ o:["Uma tecnologia que armazena, analisa e exibe dados espaciais e não espaciais",
+    "Conjunto de ferramentas que permite recolher (georreferenciar), armazenar, extrair, transformar e visualizar dados espaciais",
+    "Um poderoso conjunto de ferramentas para recuperar e transformar dados do mundo real",
+    "Sistema cuja base de dados regista ocorrências materializáveis por pontos, linhas ou áreas"],
+ c:1, s:"SIG_02",
+ e:"SIG_02: «Sistemas de Informação Geográfica — Conjunto de ferramentas que permite recolher (georreferenciar), armazenar, extrair, transformar e visualizar dados espaciais.»"},
+
+{q:"A modelação geográfica feita pelos SIG inclui (entre outros):",
+ o:["Apenas cartografia temática e navegação",
+    "Informação cadastral, infraestruturas, planeamento e gestão de recursos naturais, modelação espacial e temporal, visualização e navegação",
+    "Apenas cálculo de rotas e inventariação de recursos",
+    "Exclusivamente análise de risco e gestão de crises"],
+ c:1, s:"SIG_02",
+ e:"SIG_02: «Modelação geográfica, tendo em conta a informação cadastral, infraestruturas, planeamento e gestão de recursos naturais, modelação espacial e temporal, visualização de informação geográfica (ex: cartografia temática) e a navegação.»"},
+
+{q:"O software QGIS pode ser descarregado em:",
+ o:["esri.com","arcgis.com","qgis.org","geoportal.pt"],
+ c:2, s:"SIG_01",
+ e:"SIG_01: «Software a utilizar — Download em https://qgis.org/en/site/»"},
+
+{q:"Qual das seguintes opções está listada na disciplina como importância do SIG na Proteção Civil?",
+ o:["Substituir sistemas de comunicação de emergência",
+    "Planear, inventariar, calcular rotas, usar cartas de risco e identificar áreas suscetíveis a fenómenos",
+    "Gerir exclusivamente bases de dados alfanuméricas",
+    "Produzir apenas cartografia para fins decorativos"],
+ c:1, s:"SIG_01",
+ e:"SIG_01 — Importância do SIG na Proteção Civil: Planear, Inventariar, Cálculo de Rotas, Instrumentos de gestão do território através das cartas de riscos, Identificar áreas suscetíveis a determinados fenómenos, Apoio à decisão."},
+
+{q:"O QGIS foi iniciado em que ano e por quem?",
+ o:["2010, pela ESRI","2005, pelo OGC","2002, por Gary Sherman","1998, pela Universidade de Minnesota"],
+ c:2, s:"SIG_02",
+ e:"SIG_02: «O QGIS foi iniciado em 2002 por Gary Sherman como um projeto de software livre e open source.»"},
+
+{q:"O QGIS é descrito como uma alternativa gratuita a qual software?",
+ o:["MapInfo","AutoCAD Map","Google Earth Pro","ArcGIS"],
+ c:3, s:"SIG_02",
+ e:"SIG_02: «Tornou-se rapidamente numa das principais alternativas gratuitas aos software SIG comerciais como o ArcGIS.»"}
+]},
+
+// ══════════════════════════════════════════════
+// V2 — Cartografia (SIG_05, SIG_06)
+// ══════════════════════════════════════════════
+{label:'V2 · Cartografia', tema:'Cartografia', qs:[
+{q:"A Cartografia é definida como:",
+ o:["A ciência que trata da análise e exibição de dados espaciais",
+    "A ciência que trata da conceção, produção, utilização e estudo documental dos mapas",
+    "O conjunto de ferramentas para georreferenciar e armazenar dados",
+    "A disciplina que toma o espaço geográfico por objeto de estudo"],
+ c:1, s:"SIG_05",
+ e:"SIG_05: «Cartografia é a ciência que trata da conceção, produção, utilização e estudo documental dos mapas.»"},
+
+{q:"Qual a distinção entre 'Carta' e 'Mapa'?",
+ o:["Carta tem maior escala; Mapa tem menor escala",
+    "Carta é usada em cartografia topográfica e náutica; Mapa é a representação gráfica, a imagem/objeto",
+    "Mapa inclui apenas altimetria; Carta inclui planimétria e altimetria",
+    "Não existe diferença — são termos completamente sinónimos"],
+ c:1, s:"SIG_05",
+ e:"SIG_05 — Carta VS Mapa: «Carta é especialmente usado no âmbito da Cartografia topográfica e náutica. Mapa é a representação gráfica, a imagem/objeto.»"},
+
+{q:"Qual dos seguintes tipos de cartografia tem como objetivo «representar informação geográfica sobre um assunto específico»?",
+ o:["Topográfica","Hidrográfica","Base","Temática"],
+ c:3, s:"SIG_05",
+ e:"SIG_05: «Temática — objetivo é representar informação geográfica sobre um assunto específico. Tipicamente apresentam fenómenos localizáveis de qualquer natureza (o tema), sob forma qualitativa ou quantitativa.»"},
+
+{q:"Qual dos seguintes tipos de cartografia representa «a topografia da superfície terrestre, tão fiel e pormenorizadamente quanto a escala o permite»?",
+ o:["Hidrográfica","Base","Topográfica","Temática"],
+ c:2, s:"SIG_05",
+ e:"SIG_05: «Topográfica — Carta de base que representa, tão fiel e pormenorizadamente quanto a escala o permite, a topografia da superfície terrestre.» (GASPAR, 2004)"},
+
+{q:"A escala numérica 1:1000 é referida como:",
+ o:["Pequena escala, com menor relação com a realidade",
+    "Grande escala, com grande relação com a realidade",
+    "Escala média, sem distinção de grande ou pequena",
+    "Escala standard para cartografia topográfica nacional"],
+ c:1, s:"SIG_05",
+ e:"SIG_05: «Grande escala, grande relação com a realidade (1:1000). Pequena escala, menor relação com a realidade 1:25000.»"},
+
+{q:"Quais são os cinco elementos essenciais de um mapa, segundo a disciplina?",
+ o:["Título, datum, escala, legenda e projeção",
+    "Título, orientação, escala, legenda e fonte",
+    "Título, orientação, coordenadas, legenda e autor",
+    "Título, rosa dos ventos, escala, símbolos e datum"],
+ c:1, s:"SIG_05",
+ e:"SIG_05 — Elementos essenciais num mapa: Título, Orientação, Escala, Legenda e Fonte."},
+
+{q:"A Orientação de um mapa serve para:",
+ o:["Mostrar a relação de redução entre o mapa e a realidade",
+    "Identificar os elementos presentes no mapa através de cor ou símbolo",
+    "Indicar a posição geográfica do mapa, através da rosa dos ventos ou de um dos pontos cardinais",
+    "Indicar o autor e a data de publicação do mapa"],
+ c:2, s:"SIG_05",
+ e:"SIG_05: «Orientação — Indica a posição geográfica do mapa, através da rosa dos ventos ou de um dos pontos cardinais.»"},
+
+{q:"A Legenda de um mapa serve para:",
+ o:["Indicar a posição geográfica através da rosa dos ventos",
+    "Permitir identificar os elementos presentes no mapa, através de cor ou símbolo",
+    "Mostrar a relação de redução entre o mapa e a realidade",
+    "Indicar o sistema de projeção cartográfica utilizado"],
+ c:1, s:"SIG_05",
+ e:"SIG_05: «Legenda — Permite identificar os elementos nos elementos presentes no mapa, através de cor ou símbolo.»"},
+
+{q:"A simbologia cartográfica é definida como a codificação dos dados que passam a símbolos gráficos, com o objetivo de:",
+ o:["Aumentar o tamanho do ficheiro para maior qualidade",
+    "Simplificar e transmitir a mensagem eficazmente",
+    "Armazenar os dados em base de dados espacial",
+    "Substituir o sistema de coordenadas no mapa"],
+ c:1, s:"SIG_06",
+ e:"SIG_06: «Simbologia (codificação dos dados que passam a símbolos gráficos); Simplificar e transmitir a mensagem eficazmente.»"},
+
+{q:"A simbologia cartográfica pode variar em (entre outras variáveis):",
+ o:["Apenas cor e tamanho",
+    "Forma, tamanho, orientação, tonalidade, cor, trama, croma e textura",
+    "Apenas escala e projeção",
+    "Apenas tipo de letra e cor de fundo"],
+ c:1, s:"SIG_06",
+ e:"SIG_06 (adaptado de GASPAR, Joaquim Alves): A simbologia pode variar em Forma, Tamanho, Orientação «ângulo», Tonalidade, Cor, Trama, Croma ou intensidade/saturação e Textura ou grão."}
+]},
+
+// ══════════════════════════════════════════════
+// V3 — Aquisição de Dados (SIG_08)
+// ══════════════════════════════════════════════
+{label:'V3 · Aquisição de Dados', tema:'Aquisição de Dados', qs:[
+{q:"Quais são as duas grandes categorias de métodos de aquisição de dados para SIG?",
+ o:["Digitalização e vectorização",
+    "Primários (a partir do objeto) e secundários (a partir de fonte pré-existente)",
+    "Terrestre e aéreo",
+    "Automático e manual"],
+ c:1, s:"SIG_08",
+ e:"SIG_08: Os métodos dividem-se em Fontes/Métodos Primários (aquisição de dados a partir do objeto) e Fontes/Métodos Secundários (aquisição de dados a partir de fonte pré-existente)."},
+
+{q:"Quais dos seguintes são exemplos de métodos primários de aquisição de dados para SIG, segundo a disciplina?",
+ o:["Digitalização automática e vectorização manual",
+    "Dados estatísticos do INE e mapas topográficos",
+    "Levantamentos de campo, fotogrametria e detecção remota",
+    "Cartas geológicas e cartas de uso do solo existentes"],
+ c:2, s:"SIG_08",
+ e:"SIG_08 — Fontes/Métodos Primários: Levantamentos de campo, Fotogrametria (fotografia aérea, ortofotomapas) e Detecção Remota (satélite, avião, drone)."},
+
+{q:"Os levantamentos de campo incluem (entre outros):",
+ o:["Fotografia aérea e ortofotomapas",
+    "GPS, topografia tradicional, telemóvel, fichas de levantamento e método tradicional (mapa, fotografias)",
+    "Satélite, avião e veículo aéreo não tripulado",
+    "Digitalização automática e vectorização semi-automática"],
+ c:1, s:"SIG_08",
+ e:"SIG_08 — Levantamentos de campo: Topografia tradicional, GPS, Telemóvel, Fichas de levantamento, Método tradicional (mapa, fotografias)."},
+
+{q:"A Fotogrametria como método de aquisição de dados inclui:",
+ o:["GPS e fichas de levantamento de campo",
+    "Digitalização automática e manual",
+    "Fotografia aérea e ortofotomapas",
+    "Dados estatísticos e inquéritos"],
+ c:2, s:"SIG_08",
+ e:"SIG_08 — Fotogrametria: Fotografia aérea e Ortofotomapas."},
+
+{q:"A Detecção Remota como método de aquisição de dados é realizada através de:",
+ o:["GPS, topografia tradicional e fichas de campo",
+    "Digitalização e vectorização de mapas existentes",
+    "Satélite, avião e veículo aéreo não tripulado",
+    "Dados estatísticos e cartas de planeamento"],
+ c:2, s:"SIG_08",
+ e:"SIG_08 — Detecção Remota: Satélite, Avião e Veículo aéreo não tripulado (drone)."},
+
+{q:"Os métodos secundários de aquisição de dados para SIG incluem:",
+ o:["Fotografia aérea e levantamentos GPS",
+    "Digitalização (automática e manual) e Vectorização (automática, semi-automática e manual)",
+    "Apenas detecção remota por satélite",
+    "Apenas levantamentos de campo com fichas"],
+ c:1, s:"SIG_08",
+ e:"SIG_08 — Fontes/Métodos Secundários: Digitalização (automática e manual) e Vectorização (automática, semi-automática e manual)."},
+
+{q:"A digitalização ou vectorização de mapas existentes é descrita como:",
+ o:["A recolha direta de dados no terreno com GPS",
+    "A captação de imagens através de sensores em satélite",
+    "Utilizar informação para criar novos dados",
+    "A produção de ortofotomapas a partir de fotografia aérea"],
+ c:2, s:"SIG_08",
+ e:"SIG_08: «Digitalização ou vectorização de mapas existentes — Utilizar informação para criar novos dados.»"},
+
+{q:"Quais das seguintes fontes de dados são indicadas na disciplina como exemplos de fontes secundárias?",
+ o:["Fotografia aérea e observação com drone",
+    "GPS e topografia tradicional",
+    "Dados estatísticos (ex: INE), mapas topográficos, cartas geológicas, imagens de satélite e modelos de elevação",
+    "Levantamentos de campo com fichas e telemóvel"],
+ c:2, s:"SIG_08",
+ e:"SIG_08 — Exemplos de fontes secundárias: Dados estatísticos (ex. INE), dados recolhidos no campo (ex. GPS), mapas topográficos (várias escalas), cartas geológicas, imagens de satélite, modelos de elevação do terreno, cartas de planeamento (ex. PDM), cartas do uso do solo."},
+
+{q:"O QGIS suporta qual das seguintes funcionalidades de integração, segundo a disciplina?",
+ o:["Apenas ligações a bases de dados Oracle",
+    "Apenas ficheiros locais sem ligação a serviços externos",
+    "Acesso a serviços web (WMS, WFS, WCS) e integração com Python",
+    "Apenas importação de ficheiros CSV"],
+ c:2, s:"SIG_02",
+ e:"SIG_02 — Integração e Extensibilidade do QGIS: Acesso a serviços web (WMS, WFS, WCS), centenas de plugins, integração com Python para automação e scripts."},
+
+{q:"O QGIS é descrito na disciplina como sendo multiplataforma. Quais os sistemas operativos suportados?",
+ o:["Apenas Windows","Windows e Mac","Windows, Mac e Linux","Apenas Linux e Mac"],
+ c:2, s:"SIG_02",
+ e:"SIG_02: «O QGIS é um software SIG de código aberto, multiplataforma (Windows, Mac, Linux) e totalmente gratuita.»"}
+]},
+
+// ══════════════════════════════════════════════
+// V4 — Sistemas de Coordenadas (SIG_09)
+// ══════════════════════════════════════════════
+{label:'V4 · Coordenadas', tema:'Sistemas de Coordenadas', qs:[
+{q:"O Geóide é definido como:",
+ o:["Uma superfície matemática que melhor se aproxima do geóide",
+    "Uma superfície equipotencial cuja normal coincide com a vertical do lugar e que coincide aproximadamente com o nível médio das águas do mar",
+    "O sistema de referência espacial para posicionamento de pontos",
+    "A superfície real e irregular da Terra com todo o relevo topográfico"],
+ c:1, s:"SIG_09",
+ e:"SIG_09: «Geóide — É uma superfície equipotencial cuja normal coincide com a vertical do lugar e que coincide, aproximadamente, com o nível médio das águas do mar. É a superfície que mais se aproxima da forma da Terra. É uma 'superfície zero'.»"},
+
+{q:"O Elipsóide é definido como:",
+ o:["A superfície real da Terra com relevo topográfico",
+    "A superfície equipotencial coincidente com o nível médio do mar",
+    "Superfície matemática que melhor se aproxima do Geóide e relativamente à qual são estabelecidas as coordenadas geográficas",
+    "O sistema de projeção cartográfica de Portugal"],
+ c:2, s:"SIG_09",
+ e:"SIG_09: «Elipsóide — Superfície matemática que melhor se aproxima do Geóide, e relativamente à qual são estabelecidas as coordenadas geográficas. É uma superfície de referência.»"},
+
+{q:"A Latitude corresponde ao eixo:",
+ o:["X","Z","Y","W"],
+ c:2, s:"SIG_09",
+ e:"SIG_09: «Latitude = Y / Longitude = X»"},
+
+{q:"Os sistemas globais de projeção caracterizam-se por:",
+ o:["O geóide e o elipsóide coincidirem na vizinhança do ponto; menos distorções mas incompatíveis com outros países",
+    "O centro coincidir com o centro da massa da Terra; compatível globalmente (ex: WGS84)",
+    "Serem exclusivos de cada país com menor distorção local",
+    "Utilizarem o Datum Lisboa como referência principal"],
+ c:1, s:"SIG_09",
+ e:"SIG_09: «Sistemas globais — o centro coincide com o centro da massa da Terra. Compatível globalmente, por exemplo WGS84.»"},
+
+{q:"Os sistemas locais de projeção caracterizam-se por:",
+ o:["O centro coincidir com o centro de massa da Terra e serem compatíveis globalmente",
+    "O geóide e o elipsóide coincidirem na vizinhança do ponto; menos distorções, mas incompatível com outros países ou regiões",
+    "Usarem o WGS84 como sistema de referência",
+    "Serem utilizados exclusivamente pelo Google Maps"],
+ c:1, s:"SIG_09",
+ e:"SIG_09: «Sistemas locais — o geoide e o elipsóide coincidem na vizinhança do ponto. Menos distorções e mais precisão, mas incompatível com outros países ou região do país.»"},
+
+{q:"O código EPSG do sistema oficial atual de Portugal Continental (ETRS89/PT-TM06) é:",
+ o:["EPSG: 4326","EPSG: 27493","EPSG: 3763","EPSG: 5018"],
+ c:2, s:"SIG_09",
+ e:"SIG_09 — Portugal Continental / Sistemas Globais: EPSG: 3763 (ETRS89/PT-TM06)."},
+
+{q:"O código EPSG para a Madeira (ITRF93/PTRA08 - UTM zona 28N) é:",
+ o:["EPSG: 5014","EPSG: 5015","EPSG: 5016","EPSG: 2942"],
+ c:2, s:"SIG_09",
+ e:"SIG_09: EPSG: 5016 (ITRF93/PTRA08 - UTM zona 28N) — Madeira, Porto Santo, Desertas e Selvagens."},
+
+{q:"Qual é o código EPSG utilizado pelo Google Maps?",
+ o:["EPSG: 3763","EPSG: 4326","EPSG: 3857","EPSG: 27493"],
+ c:1, s:"SIG_09",
+ e:"SIG_09 — EPSG populares a nível global: «Google Maps EPSG 4326 / OpenStreetMap EPSG 3857»"},
+
+{q:"Os marcos geodésicos são colocados em:",
+ o:["Cruzamentos de estradas e centros urbanos",
+    "Topos de colinas ou sobre depósitos de água",
+    "Praias e zonas costeiras",
+    "Aeroportos e portos marítimos"],
+ c:1, s:"SIG_09",
+ e:"SIG_09: «Marcos geodésicos constituem a rede geodésica — Colocados em topos de colinas ou sobre depósitos de água.»"},
+
+{q:"As coordenadas geográficas determinadas sobre o elipsóide denominam-se:",
+ o:["Coordenadas astronómicas","Coordenadas naturais","Coordenadas geodésicas","Coordenadas cartográficas"],
+ c:2, s:"SIG_09",
+ e:"SIG_09: «As coordenadas geográficas quando determinadas sobre o elipsóide são denominadas de coordenadas geodésicas e quando determinadas sobre o geóide, por via astronómica, são denominadas coordenadas astronómicas ou naturais.»"}
+]},
+
+// ══════════════════════════════════════════════
+// V5 — Estruturas de Dados (SIG_10, SIG_12)
+// ══════════════════════════════════════════════
+{label:'V5 · Estruturas de Dados', tema:'Estruturas de Dados', qs:[
+{q:"No modelo vectorial, qual a geometria usada para representar caixotes do lixo, árvores ou cidades, segundo a disciplina?",
+ o:["Linhas","Polígonos","Pontos","Pixels"],
+ c:2, s:"SIG_02",
+ e:"SIG_02: «Pontos para localizar caixotes do lixo, árvores ou cidades.»"},
+
+{q:"No modelo vectorial, qual a geometria usada para representar estradas, rios ou linhas elétricas, segundo a disciplina?",
+ o:["Pontos","Polígonos","Pixels","Linhas"],
+ c:3, s:"SIG_02",
+ e:"SIG_02: «Linhas para representar estradas, rios ou linhas elétricas.»"},
+
+{q:"No modelo vectorial, qual a geometria usada para delimitar edifícios, lagos, florestas ou parcelas territoriais, segundo a disciplina?",
+ o:["Pontos","Linhas","Polígonos","Células raster"],
+ c:2, s:"SIG_02",
+ e:"SIG_02: «Polígonos para delimitar edifícios, lagos, florestas ou parcelas territoriais com fronteiras exactas.»"},
+
+{q:"Na tabela comparativa Raster vs Vectorial, qual o tipo de dado com maior precisão geométrica?",
+ o:["Raster","Vectorial","São iguais","Depende da resolução"],
+ c:1, s:"SIG_10",
+ e:"SIG_10 — Tabela Raster vs Vectorial: Precisão geométrica: Raster=Baixa / Vectorial=Alta."},
+
+{q:"Na tabela comparativa Raster vs Vectorial, qual o tipo de dado com maior tamanho de armazenamento?",
+ o:["Vectorial","São iguais","Raster","Depende do EPSG"],
+ c:2, s:"SIG_10",
+ e:"SIG_10 — Tabela Raster vs Vectorial: Tamanho de armazenamento: Raster=Grande / Vectorial=Pequena."},
+
+{q:"Na tabela comparativa Raster vs Vectorial, qual o tipo de dado com estrutura de dados mais simples?",
+ o:["Vectorial","São iguais em complexidade","Raster","Depende do geoprocessamento"],
+ c:2, s:"SIG_10",
+ e:"SIG_10 — Tabela Raster vs Vectorial: Estrutura de dados: Raster=Simples / Vectorial=Complexa."},
+
+{q:"Na tabela comparativa Raster vs Vectorial, qual o tipo de dado com melhor capacidade de análise de rede?",
+ o:["Raster","São iguais","Vectorial","Depende do software"],
+ c:2, s:"SIG_10",
+ e:"SIG_10 — Tabela Raster vs Vectorial: Análise de rede: Raster=Pobre / Vectorial=Bom."},
+
+{q:"Os dados raster são ideais para representar (entre outros):",
+ o:["Edifícios e parcelas com fronteiras exactas",
+    "Imagens de satélite, modelos digitais de elevação, temperatura, precipitação e cobertura vegetal",
+    "Redes de estradas e rios com alta precisão geométrica",
+    "Pontos de interesse e bocas de incêndio"],
+ c:1, s:"SIG_02",
+ e:"SIG_02: «Raster — Dividem o território numa grelha regular de células. Ideais para imagens de satélite, modelos digitais de elevação do terreno, mapas de temperatura, precipitação ou cobertura vegetal.»"},
+
+{q:"Quais são os tipos de bases de dados espaciais listados na disciplina?",
+ o:["MySQL, SQLite, Oracle e SQL Server",
+    "GeoPackage, Oracle Spatial, PostGIS, SpatialLite e Geodatabase",
+    "Shapefile, GeoJSON, GeoTIFF e KML",
+    "WMS, WFS, WCS e WMTS"],
+ c:1, s:"SIG_12",
+ e:"SIG_12 — Tipos de base de dados espaciais: GeoPackage, Oracle Spatial, PostGIS, SpatialLite, Geodatabase e outros."},
+
+{q:"Na estrutura vectorial, o que representa cada linha da tabela de atributos?",
+ o:["Uma coluna com um tipo de dado diferente",
+    "Um sistema de coordenadas diferente",
+    "O atributo específico de um único elemento geográfico",
+    "Uma camada (layer) diferente no SIG"],
+ c:2, s:"SIG_10",
+ e:"SIG_10 — Vectoriais: «Interseção de uma linha com uma coluna representa o atributo específico de um único elemento.»"}
+]},
+
+// ══════════════════════════════════════════════
+// V6 — Funcionalidades de Análise (SIG_11)
+// ══════════════════════════════════════════════
+{label:'V6 · Análise SIG', tema:'Funcionalidades de Análise', qs:[
+{q:"O geoprocessamento é definido como:",
+ o:["A visualização de dados espaciais em camadas sobrepostas",
+    "Operações que permitem a caracterização e determinação de relações dos dados espaciais",
+    "A aquisição de dados por detecção remota",
+    "A criação de bases de dados espaciais em PostGIS"],
+ c:1, s:"SIG_11",
+ e:"SIG_11: «Geoprocessamento — Permite operações para caracterização e determinação de relações dos dados espaciais. Ou seja permite a análise espacial de dados de diferentes índoles.»"},
+
+{q:"Quais das seguintes operações são listadas na disciplina como operações de geoprocessamento?",
+ o:["WMS, WFS e WCS",
+    "Buffer, Interseções, Dissolve, Join e Union",
+    "GPS, topografia e fotogrametria",
+    "GeoPackage, PostGIS e SpatialLite"],
+ c:1, s:"SIG_11",
+ e:"SIG_11 — Geoprocessamento: Buffer, Interseções, Dissolve, Join, Union, Etc."},
+
+{q:"O geoprocessamento em vectorial e em raster:",
+ o:["É sempre idêntico, independentemente do tipo de dado",
+    "Difere consoante o tipo de dados",
+    "Só é possível em dados vectoriais",
+    "Só é possível em dados raster"],
+ c:1, s:"SIG_11",
+ e:"SIG_11: «Geoprocessamento em vectorial e em raster — Difere consoante o tipo de dados. Exemplo: Clip ou gerar curvas de nível.»"},
+
+{q:"O serviço WFS distingue-se do WMS porque:",
+ o:["O WFS serve imagens raster; o WMS serve dados vectoriais",
+    "O WFS é apenas de leitura; o WMS permite gravar dados remotamente",
+    "O WFS permite gravar os dados remotamente; o WMS é de leitura",
+    "Não existe diferença funcional entre os dois serviços"],
+ c:2, s:"SIG_11",
+ e:"SIG_11: «WMS/WMTS (de leitura) / WCS (de leitura + verificar os atributos ao clicar) / WFS (permite gravar os dados remotamente)»"},
+
+{q:"O serviço WCS (Web Coverage Service) é descrito como:",
+ o:["Apenas de leitura de imagens como o WMS",
+    "De leitura com possibilidade de verificar os atributos ao clicar",
+    "Igual ao WFS com capacidade de escrita remota",
+    "Um serviço exclusivo para dados GPS"],
+ c:1, s:"SIG_11",
+ e:"SIG_11: «WCS (de leitura + verificar os atributos ao clicar)»"},
+
+{q:"Na tabela comparativa Raster vs Vectorial, qual o tipo de dado com recolha de dados mais rápida?",
+ o:["Vectorial","São iguais","Raster","Depende do método de aquisição"],
+ c:2, s:"SIG_10",
+ e:"SIG_10 — Tabela Raster vs Vectorial: Recolha de dados: Raster=Rápido / Vectorial=Lento."},
+
+{q:"Na tabela comparativa Raster vs Vectorial, qual o tipo de dado com generalização mais simples?",
+ o:["Vectorial","São iguais","Raster","Depende da escala"],
+ c:2, s:"SIG_10",
+ e:"SIG_10 — Tabela Raster vs Vectorial: Generalização: Raster=Simples / Vectorial=Complexa."},
+
+{q:"Na tabela comparativa Raster vs Vectorial, qual o tipo de dado com modelação mais simples?",
+ o:["Vectorial","Raster","São iguais em complexidade","Depende do software"],
+ c:1, s:"SIG_10",
+ e:"SIG_10 — Tabela Raster vs Vectorial: Modelação: Raster=Simples / Vectorial=Complexo."},
+
+{q:"Na tabela comparativa Raster vs Vectorial, a transformação de coordenadas é mais complexa em:",
+ o:["Vectorial","São iguais","Raster","Depende do EPSG utilizado"],
+ c:2, s:"SIG_10",
+ e:"SIG_10 — Tabela Raster vs Vectorial: Transformação de coordenadas: Raster=Complexo / Vectorial=Simples."},
+
+{q:"O QGIS suporta, segundo a disciplina, ligação a bases de dados espaciais como:",
+ o:["MySQL e SQL Server","PostgreSQL/PostGIS e Oracle Spatial","MongoDB e Redis","Apenas ficheiros locais Shapefile"],
+ c:1, s:"SIG_02",
+ e:"SIG_02 — Visualização e Gestão de Dados do QGIS: «Ligação a bases de dados espaciais (PostgreSQL/PostGIS, Oracle Spatial).»"}
+]},
+
+// ══════════════════════════════════════════════
+// V7 — SIG em Proteção Civil (SIG_13)
+// ══════════════════════════════════════════════
+{label:'V7 · Proteção Civil', tema:'SIG em Proteção Civil', qs:[
+{q:"Quais são as três fases em que os SIG têm papel na Proteção Civil?",
+ o:["Prevenção, mitigação e resposta",
+    "Planeamento, gestão de crises e pós-evento",
+    "Identificação, análise e comunicação",
+    "Cartografia, análise e divulgação"],
+ c:1, s:"SIG_13",
+ e:"SIG_13 — O papel dos SIG na Proteção Civil: Planeamento / Gestão de crises (ferramenta importante para a tomada de decisões) / Pós-evento."},
+
+{q:"A gestão de crises com SIG é descrita como:",
+ o:["Uma fase exclusivamente de arquivo e documentação",
+    "Uma ferramenta importante para a tomada de decisões",
+    "Um processo automático sem necessidade de operadores",
+    "Uma fase apenas de produção de cartografia temática"],
+ c:1, s:"SIG_13",
+ e:"SIG_13: «Gestão de crises — ferramenta importante para a tomada de decisões.»"},
+
+{q:"O pós-evento na Proteção Civil inclui (entre outros):",
+ o:["Apenas a produção de cartografia para arquivo",
+    "Cálculo de rotas, levantamentos, previsão, avaliação e riscos coletivos do território",
+    "Apenas a atualização de bases de dados alfanuméricas",
+    "Exclusivamente a produção de relatórios estatísticos"],
+ c:1, s:"SIG_13",
+ e:"SIG_13 — Pós-evento: «Cálculo de rotas, levantamentos, previsão, avaliação e riscos coletivos do território. Análise das vulnerabilidades perante situações de risco. Soluções de emergência.»"},
+
+{q:"Qual das seguintes opções faz parte do pós-evento na Proteção Civil?",
+ o:["Inventariar recursos e elaborar cartas de risco",
+    "Elaborar Planos de Emergência Externos",
+    "Análise das vulnerabilidades perante situações de risco e soluções de emergência",
+    "Configurar sistemas de comunicação de alerta"],
+ c:2, s:"SIG_13",
+ e:"SIG_13 — Pós-evento: «Análise das vulnerabilidades perante situações de risco. Soluções de emergência.»"},
+
+{q:"A importância do SIG na Proteção Civil inclui «Instrumentos de gestão do território» através de:",
+ o:["Relatórios administrativos de gestão municipal",
+    "As cartas de riscos",
+    "As bases de dados alfanuméricas de população",
+    "Os ortofotomapas aéreos das zonas urbanas"],
+ c:1, s:"SIG_01",
+ e:"SIG_01 — Importância do SIG na Proteção Civil: «Instrumentos de gestão do território através das cartas de riscos.»"},
+
+{q:"O «Guia Metodológico para a Produção de Cartografia Municipal de Risco» inclui qual das seguintes cartas?",
+ o:["Cartas hidrográficas, topográficas e de base",
+    "Cartas de Suscetibilidade, Carta de Elementos Expostos e Cartas de Localização do Risco",
+    "Apenas ortofotomapas e modelos digitais de elevação",
+    "Apenas cartas administrativas de concelhos e freguesias"],
+ c:1, s:"SIG_13",
+ e:"SIG_13 — Guia Metodológico: «Cartas de Suscetibilidade, Carta de Elementos Expostos, Cartas de Localização do Risco.»"},
+
+{q:"A cartografia municipal de risco é utilizada em:",
+ o:["Apenas no planeamento de obras públicas municipais",
+    "Na revisão dos PDM e no planeamento de emergência",
+    "Exclusivamente em operações de socorro e resgate",
+    "Apenas na gestão de recursos hídricos municipais"],
+ c:1, s:"SIG_13",
+ e:"SIG_13: «A utilização da cartografia municipal de risco na revisão dos PDM» e «A utilização da cartografia municipal de risco no planeamento de emergência.»"},
+
+{q:"Os Cadernos Técnicos ANEPC indicam:",
+ o:["O software obrigatório para os SIG municipais",
+    "As orientações legais sobre como deve ser elaborada a cartografia tendo em conta as diversas temáticas",
+    "Os sistemas de coordenadas a utilizar em Portugal",
+    "Os formatos de ficheiro aceites nos SIG de Proteção Civil"],
+ c:1, s:"SIG_13",
+ e:"SIG_13 — Cadernos Técnicos ANEPC: «Indicam as orientações legais como devem ser elaborada a cartografia tendo em conta as diversas temáticas.»"},
+
+{q:"O exemplo prático da importância do SIG na Proteção Civil é ilustrado com:",
+ o:["Uma inundação de 500 km² no rio Douro",
+    "Um sismo de magnitude 6 no Algarve",
+    "Uma área ardida de 700 hectares",
+    "Uma erupção vulcânica nos Açores"],
+ c:2, s:"SIG_01",
+ e:"SIG_01: «Importância do SIG na Proteção Civil – Exemplo área ardida 700 hectares.»"},
+
+{q:"Qual das seguintes opções está listada como importância do SIG na Proteção Civil?",
+ o:["Substituir os sistemas de comunicação de emergência",
+    "Planear, inventariar, calcular rotas, usar cartas de risco, identificar áreas suscetíveis e apoio à decisão",
+    "Gerir exclusivamente bases de dados alfanuméricas administrativas",
+    "Produzir apenas cartografia topográfica de base"],
+ c:1, s:"SIG_01",
+ e:"SIG_01 — Importância do SIG na Proteção Civil: Planear, Inventariar, Cálculo de Rotas, Instrumentos de gestão do território através das cartas de riscos, Identificar áreas suscetíveis a determinados fenómenos, Apoio à decisão."}
+]},
+
+// ══════════════════════════════════════════════
+// V8 — Revisão Geral
+// ══════════════════════════════════════════════
+{label:'V8 · Revisão Geral', tema:'Revisão Geral', qs:[
+{q:"Qual das três definições de SIG apresentadas na disciplina pertence a Dueker (1979)?",
+ o:["«Um poderoso conjunto de ferramentas para recolher, armazenar, recuperar, transformar e visualizar dados sobre o mundo real»",
+    "«Uma tecnologia de informação que armazena, analisa e exibe tanto dados espaciais como não espaciais»",
+    "«Sistema de informação cuja base de dados regista ocorrências de entidades materializáveis por pontos, linhas ou áreas, disponibilizando ferramentas para querys ou análise espacial»",
+    "«Conjunto de ferramentas que permite recolher (georreferenciar), armazenar, extrair, transformar e visualizar dados espaciais»"],
+ c:2, s:"SIG_01",
+ e:"SIG_01: Burrough=«poderoso conjunto...», Parker=«tecnologia de informação...», Dueker=«sistema de informação cuja base de dados regista ocorrências...»"},
+
+{q:"A escala 1:25000 é classificada como:",
+ o:["Grande escala","Escala média","Pequena escala","Escala natural"],
+ c:2, s:"SIG_05",
+ e:"SIG_05: «Grande escala, grande relação com a realidade (1:1000). Pequena escala, menor relação com a realidade 1:25000.»"},
+
+{q:"Qual o código EPSG do Datum 73 / Hayford-Gauss (Portugal Continental)?",
+ o:["EPSG: 3763","EPSG: 4207","EPSG: 27493","EPSG: 5018"],
+ c:2, s:"SIG_09",
+ e:"SIG_09 — Portugal Continental / Sistemas Locais: EPSG: 27493 (Datum 73/Hayford-Gauss)."},
+
+{q:"Qual o código EPSG utilizado pelo OpenStreetMap?",
+ o:["EPSG: 4326","EPSG: 3763","EPSG: 3857","EPSG: 5016"],
+ c:2, s:"SIG_09",
+ e:"SIG_09 — EPSG populares: «Google Maps EPSG 4326 / OpenStreetMap EPSG 3857»"},
+
+{q:"A simbologia cartográfica é descrita como a codificação dos dados que passam a símbolos gráficos. Esta variável é adaptada de qual autor?",
+ o:["Burrough","Parker","GASPAR, Joaquim Alves","Dueker"],
+ c:2, s:"SIG_06",
+ e:"SIG_06: «Adaptado de GASPAR, Joaquim Alves» — a lista de variáveis visuais (forma, tamanho, orientação, tonalidade, cor, trama, croma, textura)."},
+
+{q:"O QGIS suporta dados vectoriais em quais dos seguintes formatos?",
+ o:["GeoTIFF e JPEG","Shapefiles, GeoJSON e GeoPackage","Apenas Shapefiles (.shp)","Apenas GeoPackage (.gpkg)"],
+ c:1, s:"SIG_02",
+ e:"SIG_02 — QGIS: «Suporta dados vectoriais (shapefiles, GeoJSON, GeoPackage) e raster (GeoTIFF, imagens de satélite).»"},
+
+{q:"A rede geodésica é descrita como uma malha que dá coordenadas com:",
+ o:["Menor exactidão para cobrir maiores áreas",
+    "Exactidão média para uso em GPS de consumo",
+    "Maior exactidão possível",
+    "Exactidão suficiente apenas para escala 1:25000"],
+ c:2, s:"SIG_09",
+ e:"SIG_09: «Dão coordenadas geográficas com maior exactidão possível criando uma grande malha triangular.»"},
+
+{q:"O papel dos SIG na Proteção Civil inclui «soluções de emergência». Em que fase se insere?",
+ o:["Planeamento","Gestão de crises","Pós-evento","Aquisição de dados"],
+ c:2, s:"SIG_13",
+ e:"SIG_13 — Pós-evento: «Análise das vulnerabilidades perante situações de risco. Soluções de emergência.»"},
+
+{q:"Os dados vectoriais têm «Precisão contínua» porque:",
+ o:["Cada pixel representa uma área de terreno fixa",
+    "A forma é definida por coordenadas exactas, mantendo bordas suaves e precisas, podendo ampliar infinitamente sem perder qualidade",
+    "Dependem da resolução espacial do ficheiro",
+    "Cada célula armazena um valor numérico representando o fenómeno"],
+ c:1, s:"SIG_02",
+ e:"SIG_02: «Dados Vectoriais — Precisão contínua: A forma é definida por coordenadas exactas, mantendo bordas suaves e precisas. Independente da escala: Pode ampliar infinitamente sem perder qualidade.»"},
+
+{q:"O QGIS permite realizar qual das seguintes operações de análise espacial?",
+ o:["Apenas visualização de mapas sem qualquer análise",
+    "Geoprocessamento (buffer, interseção, união, dissolve) e análise de redes",
+    "Apenas importação de ficheiros CSV sem análise espacial",
+    "Apenas ligação a serviços WMS externos"],
+ c:1, s:"SIG_02",
+ e:"SIG_02 — Análise Espacial do QGIS: «Geoprocessamento (buffer, intersecção, união, dissolve), análise de proximidade e distâncias, estatísticas zonais e análise de terreno, análise de redes (rotas, áreas de serviço).»"}
+]}
+
+,
+
+// ══════════════════════════════════════════════
+// V9 — SIG em Proteção Civil · Nível Básico (SIG_01 e SIG_13)
+// ══════════════════════════════════════════════
+{label:'V9 · PC Básico', tema:'SIG em Proteção Civil (Básico)', qs:[
+{q:"Os SIG são úteis na Proteção Civil para apoiar a tomada de decisões em qual das seguintes fases?",
+ o:["Apenas antes de qualquer ocorrência",
+    "Gestão de crises",
+    "Apenas após o fim de uma emergência",
+    "Apenas na produção de mapas em papel"],
+ c:1, s:"SIG_13",
+ e:"SIG_13: «Gestão de crises — ferramenta importante para a tomada de decisões.»"},
+
+{q:"Qual das seguintes é uma das importâncias do SIG na Proteção Civil, segundo a disciplina?",
+ o:["Substituir os bombeiros em operações de resgate",
+    "Planear",
+    "Imprimir relatórios administrativos",
+    "Gerir contas bancárias municipais"],
+ c:1, s:"SIG_01",
+ e:"SIG_01 — Importância do SIG na Proteção Civil: Planear, Inventariar, Cálculo de Rotas, Instrumentos de gestão do território através das cartas de riscos, Identificar áreas suscetíveis, Apoio à decisão."},
+
+{q:"Qual das seguintes é também uma importância do SIG na Proteção Civil?",
+ o:["Construir estradas e pontes",
+    "Gerir sistemas de videovigilância",
+    "Inventariar",
+    "Emitir licenças de construção"],
+ c:2, s:"SIG_01",
+ e:"SIG_01 — Importância do SIG na Proteção Civil: Planear, Inventariar, Cálculo de Rotas, Instrumentos de gestão do território através das cartas de riscos, Identificar áreas suscetíveis, Apoio à decisão."},
+
+{q:"Os SIG permitem identificar na Proteção Civil:",
+ o:["Áreas suscetíveis a determinados fenómenos",
+    "O número de bombeiros disponíveis em cada quartel",
+    "As marcas de veículos de emergência mais eficientes",
+    "Os custos de cada operação de socorro"],
+ c:0, s:"SIG_01",
+ e:"SIG_01: «Identificar áreas suscetíveis a determinados fenómenos» — é uma das importâncias dos SIG na Proteção Civil."},
+
+{q:"O «Cálculo de Rotas» referido na disciplina como importância do SIG na Proteção Civil serve para:",
+ o:["Calcular o custo de construção de novas estradas",
+    "Determinar percursos de evacuação ou de acesso a zonas de emergência",
+    "Registar o histórico de acidentes rodoviários",
+    "Atualizar a sinalização de trânsito"],
+ c:1, s:"SIG_01",
+ e:"SIG_01: «Cálculo de Rotas» está listado como uma das importâncias do SIG na Proteção Civil — permite apoiar evacuações, acesso a zonas de risco e logística de emergência."},
+
+{q:"A fase de Planeamento dos SIG na Proteção Civil serve para:",
+ o:["Reagir a emergências em curso em tempo real",
+    "Avaliar danos após uma ocorrência",
+    "Preparar antecipadamente com cartas de risco e identificação de áreas suscetíveis",
+    "Registar ocorrências em bases de dados alfanuméricas"],
+ c:2, s:"SIG_13",
+ e:"SIG_13: O Planeamento é uma das três fases do papel dos SIG na Proteção Civil — envolve a preparação antecipada com instrumentos como cartas de risco e identificação de áreas suscetíveis."},
+
+{q:"As «Soluções de emergência» são referidas em qual das fases do papel dos SIG na Proteção Civil?",
+ o:["Planeamento","Gestão de crises","Pós-evento","Aquisição de dados"],
+ c:2, s:"SIG_13",
+ e:"SIG_13 — Pós-evento: «Cálculo de rotas, levantamentos, previsão, avaliação e riscos coletivos do território. Análise das vulnerabilidades perante situações de risco. Soluções de emergência.»"},
+
+{q:"Os Cadernos Técnicos ANEPC são descritos como documentos que:",
+ o:["Definem os sistemas de coordenadas obrigatórios em Portugal",
+    "Indicam as orientações legais sobre como deve ser elaborada a cartografia nas diversas temáticas",
+    "Listam o equipamento obrigatório nos veículos de emergência",
+    "Descrevem os softwares SIG aprovados para uso nos municípios"],
+ c:1, s:"SIG_13",
+ e:"SIG_13 — Cadernos Técnicos ANEPC: «Indicam as orientações legais como devem ser elaborada a cartografia tendo em conta as diversas temáticas.»"},
+
+{q:"Qual das seguintes cartas faz parte do Guia Metodológico para a Produção de Cartografia Municipal de Risco?",
+ o:["Carta Hidrográfica","Carta Topográfica","Carta de Elementos Expostos","Carta Náutica"],
+ c:2, s:"SIG_13",
+ e:"SIG_13 — Guia Metodológico: Cartas de Suscetibilidade, Carta de Elementos Expostos e Cartas de Localização do Risco."},
+
+{q:"Na tabela de atributos de dados vectoriais, o que representa a interseção de uma linha com uma coluna?",
+ o:["O sistema de coordenadas do elemento geográfico",
+    "O atributo específico de um único elemento",
+    "A geometria (ponto, linha ou polígono) do elemento",
+    "A resolução espacial do ficheiro raster"],
+ c:1, s:"SIG_10",
+ e:"SIG_10 — Vectoriais: «Interseção de uma linha com uma coluna representa o atributo específico de um único elemento.»"}
+]}
+
+,
+
+// ══════════════════════════════════════════════
+// V10 — Nível Avançado · Todos os temas (SIG_01 a SIG_13)
+// ══════════════════════════════════════════════
+{label:'V10 · Avançado', tema:'Nível Avançado — Todos os Temas', qs:[
+{q:"A definição de Dueker (1979) distingue-se das de Burrough e Parker porque:",
+ o:["É a única que menciona explicitamente ferramentas para visualização de dados",
+    "Introduz o conceito de base de dados que regista ocorrências de entidades materializáveis por pontos, linhas ou áreas e integra ferramentas para querys e análise espacial",
+    "É a única que inclui dados não espaciais",
+    "Refere especificamente o conceito de geóide e elipsóide como base do sistema"],
+ c:1, s:"SIG_01",
+ e:"SIG_01 — Dueker (1979): «sistema de informação cuja base de dados regista ocorrências de entidades, atividades ou eventos espacialmente distribuídos, materializáveis por pontos, linhas ou áreas, integrando informação e disponibilizando ferramentas para querys ou análise espacial» — é a definição mais operacional e estrutural das três."},
+
+{q:"Um mapa à escala 1:1 000 e outro à escala 1:25 000 representam a mesma área real. Qual das seguintes afirmações é correta?",
+ o:["O mapa 1:25 000 ocupa mais espaço em papel mas tem menos detalhe",
+    "O mapa 1:1 000 tem maior detalhe mas cobre uma área menor do território",
+    "Ambos os mapas têm o mesmo nível de detalhe, diferindo apenas no tamanho físico",
+    "O mapa 1:25 000 é de grande escala e o 1:1 000 é de pequena escala"],
+ c:1, s:"SIG_05",
+ e:"SIG_05: «Grande escala, grande relação com a realidade (1:1000)» — representa uma área menor com muito mais detalhe. «Pequena escala, menor relação com a realidade 1:25000» — cobre mais território mas com menos pormenor."},
+
+{q:"Qual a sequência correta do processo cartográfico de modelação da Terra, da superfície real até ao mapa?",
+ o:["Elipsóide → Geóide → Projeção → Mapa",
+    "Terra (Geóide) → Elipsóide → Sistema de projeção do esferóide para o plano → Redução de escala → Mapa com coordenadas cartográficas",
+    "Terra → Mapa → Elipsóide → Geóide",
+    "Projeção → Elipsóide → Geóide → Terra"],
+ c:1, s:"SIG_09",
+ e:"SIG_09 — Processo cartográfico: Terra real (Geóide) → aproximação matemática (Elipsóide) → sistema de projeção do esferóide para o plano → redução de escala → mapa com coordenadas cartográficas."},
+
+{q:"Porque é que os sistemas de coordenadas locais têm menor distorção do que os globais?",
+ o:["Porque usam o WGS84 como base e são compatíveis com todos os países",
+    "Porque o geóide e o elipsóide coincidem na vizinhança do ponto de referência, reduzindo as diferenças entre a superfície real e o modelo matemático",
+    "Porque utilizam pixéis de menor resolução, aumentando a precisão geométrica",
+    "Porque o centro do sistema coincide com o centro de massa da Terra"],
+ c:1, s:"SIG_09",
+ e:"SIG_09: «Sistemas locais — o geóide e o elipsóide coincidem na vizinhança do ponto. Menos distorções e mais precisão, mas incompatível com outros países ou regiões.»"},
+
+{q:"Num shapefile vectorial, qual dos seguintes tipos de dados pode ser armazenado nas colunas da tabela de atributos?",
+ o:["Apenas texto (string) e números inteiros",
+    "Whole number (integer), Decimal number (real), Text (string), Date e Date & Time",
+    "Apenas coordenadas geográficas e identificadores únicos",
+    "Apenas valores raster em formato numérico contínuo"],
+ c:1, s:"SIG_10",
+ e:"SIG_10 — Colunas de um shapefile no QGIS podem armazenar: Whole number (integer), Whole number (integer 64 bit), Decimal number (real), Text (string), Date e Date & Time."},
+
+{q:"Qual a diferença fundamental entre os serviços WMS, WCS e WFS na integração de dados externos num SIG?",
+ o:["WMS serve dados vectoriais; WCS serve dados raster; WFS serve dados alfanuméricos",
+    "WMS é de leitura (visualização como imagem); WCS é de leitura com verificação de atributos ao clicar; WFS permite gravar os dados remotamente",
+    "Todos são equivalentes — diferem apenas no formato de ficheiro devolvido",
+    "WMS é gratuito; WCS é pago; WFS é exclusivo do ArcGIS"],
+ c:1, s:"SIG_11",
+ e:"SIG_11: «WMS/WMTS (de leitura) / WCS (de leitura + verificar os atributos ao clicar) / WFS (permite gravar os dados remotamente)» — distinção operacional fundamental entre os três serviços."},
+
+{q:"Na tabela comparativa Raster vs Vectorial, qual o tipo de dado que combina simultaneamente: estrutura simples, recolha rápida, modelação simples e generalização simples?",
+ o:["Vectorial","Ambos partilham estas características","Raster","Nenhum dos dois — estas características não coexistem"],
+ c:2, s:"SIG_10",
+ e:"SIG_10 — Tabela comparativa: Raster tem Estrutura=Simples, Recolha=Rápida, Modelação=Simples, Generalização=Simples. Em contrapartida, Vectorial tem Estrutura=Complexa, Recolha=Lenta, Modelação=Complexo, Generalização=Complexa."},
+
+{q:"O Guia Metodológico para a Produção de Cartografia Municipal de Risco articula três tipos de cartas numa sequência lógica. Qual a ordem correta?",
+ o:["Carta de Elementos Expostos → Carta de Suscetibilidade → Carta de Localização do Risco",
+    "Carta de Localização do Risco → Carta de Suscetibilidade → Carta de Elementos Expostos",
+    "Carta de Suscetibilidade → Carta de Elementos Expostos → Carta de Localização do Risco",
+    "Carta de Localização do Risco → Carta de Elementos Expostos → Carta de Suscetibilidade"],
+ c:2, s:"SIG_13",
+ e:"SIG_13 — O diagrama do Guia Metodológico (Fonte: Página 33) mostra: Suscetibilidade (perigo + severidade) → combinada com Elementos Expostos (valor + vulnerabilidade) → resulta na Localização do Risco."},
+
+{q:"Qual das seguintes afirmações explica corretamente por que os dados vectoriais têm menor tamanho de armazenamento do que os raster?",
+ o:["Porque os vectoriais comprimem automaticamente as coordenadas em formato binário",
+    "Porque os vectoriais armazenam apenas as coordenadas exatas dos elementos; os raster têm de armazenar um valor para cada célula de toda a extensão coberta",
+    "Porque os raster incluem metadados adicionais que aumentam o tamanho do ficheiro",
+    "Porque os vectoriais não suportam dados contínuos, reduzindo a quantidade de informação"],
+ c:1, s:"SIG_10",
+ e:"SIG_10: O vectorial regista coordenadas exactas apenas dos elementos existentes; o raster divide toda a área em células e armazena um valor por célula — mesmo onde não há informação relevante — resultando em ficheiros muito maiores."},
+
+{q:"A Ciência da Informação Geográfica e os Sistemas de Informação Geográfica são dois conceitos distintos. Qual a relação correta entre eles?",
+ o:["São sinónimos — ambos descrevem o mesmo objeto de estudo e as mesmas ferramentas",
+    "A Ciência da Informação Geográfica é a disciplina académica que toma o espaço geográfico por objeto de estudo; os SIG são o conjunto de ferramentas técnicas que a suportam",
+    "Os SIG são a disciplina académica; a Ciência da Informação Geográfica é o software utilizado",
+    "A Ciência da Informação Geográfica estuda apenas dados raster; os SIG tratam apenas dados vectoriais"],
+ c:1, s:"SIG_02",
+ e:"SIG_02: «Ciência da Informação Geográfica — Disciplina que toma o espaço geográfico por objeto de estudo.» Os SIG são «conjunto de ferramentas que permite recolher, armazenar, extrair, transformar e visualizar dados espaciais» — são a componente tecnológica que materializa essa ciência."}
+]}
+
+]; // fim EXAMS
+
+// ═══════════ ESTADO ═══════════
+let cur = 0, ans = {};
+
+function init(){
+  const tc = document.getElementById('tabs');
+  tc.innerHTML = EXAMS.map((e,i)=>`<button class="tab${i===0?' on':''}" onclick="go(${i})">${e.label}</button>`).join('');
+  render();
+}
+
+function go(i){
+  cur=i; ans={};
+  document.querySelectorAll('.tab').forEach((b,j)=>b.classList.toggle('on',j===i));
+  document.getElementById('hero-theme').textContent=EXAMS[i].tema;
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function render(){
+  const ex = EXAMS[cur];
+  const m = document.getElementById('main');
+  m.innerHTML='';
+
+  // result card
+  const rc=document.createElement('div');
+  rc.className='result';rc.id='rc';
+  rc.innerHTML=`<div class="res-num" id="rn">0<sub>/${ex.qs.length}</sub></div>
+    <div class="res-sub">respostas corretas</div>
+    <div class="res-track"><div class="res-bar" id="rb" style="width:0%"></div></div>
+    <div class="res-pills"><span class="pill g" id="rg"></span><span class="pill r" id="rr"></span></div>
+    <div class="res-msg" id="rm"></div>
+    <button class="retry" onclick="doReset()">↺ Tentar novamente</button>`;
+  m.appendChild(rc);
+
+  ex.qs.forEach((q,qi)=>{
+    const d=document.createElement('div');
+    d.className='qc';d.id='qc'+qi;
+    d.innerHTML=`<div class="qtop"><span class="qnum">Q ${qi+1}</span><span class="qtext">${q.q}</span></div>
+      <div class="qopts">${q.o.map((o,oi)=>`
+        <button class="opt" id="o${qi}_${oi}" onclick="pick(${qi},${oi})">
+          <span class="ol">${String.fromCharCode(65+oi)}</span>
+          <span style="flex:1">${o}</span>
+          <span class="oi" id="oi${qi}_${oi}"></span>
+        </button>`).join('')}</div>
+      <div class="qfb" id="fb${qi}"></div>`;
+    m.appendChild(d);
+  });
+  updateSB();
+}
+
+function pick(qi,oi){
+  if(ans[qi]!==undefined)return;
+  const ex=EXAMS[cur]; const q=ex.qs[qi];
+  ans[qi]=oi;
+  const ok=oi===q.c;
+  q.o.forEach((_,i)=>{
+    const b=document.getElementById(`o${qi}_${i}`);
+    const ic=document.getElementById(`oi${qi}_${i}`);
+    b.disabled=true;
+    if(i===q.c){b.classList.add('s-ok');ic.textContent='✓';}
+    else if(i===oi&&!ok){b.classList.add('s-err');ic.textContent='✗';}
+    else b.classList.add('s-dim');
+  });
+  const fb=document.getElementById('fb'+qi);
+  fb.className=`qfb on ${ok?'ok':'err'}`;
+  fb.innerHTML=`<strong>${ok?'Correto!':'Incorreto.'}</strong> ${q.e}<span class="slide-ref">Fonte: ${q.s}</span>`;
+  document.getElementById('qc'+qi).classList.add(ok?'ok':'err');
+  updateSB(); checkEnd();
+}
+
+function updateSB(){
+  const ex=EXAMS[cur]; const t=ex.qs.length;
+  const done=Object.keys(ans).length;
+  const ok=ex.qs.reduce((a,q,i)=>a+(ans[i]===q.c?1:0),0);
+  document.getElementById('c-ok').textContent=ok;
+  document.getElementById('c-err').textContent=done-ok;
+  document.getElementById('c-pend').textContent=t-done;
+  document.getElementById('sb-lbl').textContent=`${done} / ${t}`;
+  document.getElementById('sb-fill').style.width=(done/t*100)+'%';
+}
+
+function checkEnd(){
+  const ex=EXAMS[cur]; const t=ex.qs.length;
+  if(Object.keys(ans).length<t)return;
+  const ok=ex.qs.reduce((a,q,i)=>a+(ans[i]===q.c?1:0),0);
+  const pct=Math.round(ok/t*100);
+  const rc=document.getElementById('rc');
+  rc.classList.add('on');
+  document.getElementById('rn').innerHTML=`${ok}<sub>/${t}</sub>`;
+  document.getElementById('rb').style.width=pct+'%';
+  document.getElementById('rg').textContent=`✓ ${ok} certas`;
+  document.getElementById('rr').textContent=`✗ ${t-ok} erradas`;
+  let msg='';
+  if(pct>=90)msg='Excelente! Dominaste este tema. Experimenta outra versão!';
+  else if(pct>=70)msg='Bom resultado! Revê as perguntas onde erraste e tenta outra versão.';
+  else if(pct>=50)msg='Resultado razoável. Volta a rever este tema antes de continuar.';
+  else msg='Precisas de estudar mais este tema. Volta a estudar este tema com atenção.';
+  document.getElementById('rm').textContent=msg;
+  rc.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function doReset(){ans={};render();window.scrollTo({top:0,behavior:'smooth'});}
+
+init();
+</script>
+</body>
+</html>
